@@ -159,3 +159,41 @@ def test_isolation_forest_score_matches_paper_definition():
     s = det.score(X[:10])
     assert np.all((s > 0) & (s < 1))
     assert np.allclose(s, -det.model.score_samples(X[:10]))
+
+
+# ------------------------------------------------------------- review-driven additions
+def test_dif_ranks_obvious_outliers_higher():
+    # outliers far out in random orthants (random saturating networks hash a single-direction
+    # shift onto patterns that inliers also produce, so the test uses spread-out outliers)
+    rng = np.random.default_rng(0)
+    X = rng.normal(size=(2000, 6))
+    out = rng.choice([-8, 8], size=(30, 6)) * rng.uniform(0.8, 1.2, size=(30, 6))
+    d = make("DIF", 0, n_ensemble=8).fit(X)
+    assert np.median(d.score(out)) > np.quantile(d.score(X[:500]), 0.9)
+
+
+def test_stratified_view_calibrates_each_service_separately():
+    from anomalyguard.pipeline import run_view_stratified
+    rng = np.random.default_rng(1)
+    # two services with very different scales: per-service calibration must make benign
+    # validation p-values of both services comparable (about 1 % below 0.01 in each)
+    a = rng.normal(0, 1, size=(4000, 4)); b = rng.normal(20, 5, size=(4000, 4))
+    X = np.vstack([a, b]); svc = np.r_[["mqtt"] * 4000, ["http"] * 4000]
+    tr = np.r_[np.arange(0, 2000), np.arange(4000, 6000)]
+    va = np.r_[np.arange(2000, 3000), np.arange(6000, 7000)]
+    te = np.r_[np.arange(3000, 4000), np.arange(7000, 8000)]
+    r = run_view_stratified("IF", 0, X[tr], X[va], X[te], svc[tr], svc[va], svc[te], max_samples=256,
+                            stratify=True)
+    p = np.exp(-r.test)
+    for s in ("mqtt", "http"):
+        assert abs((p[svc[te] == s] <= 0.05).mean() - 0.05) < 0.03
+
+
+def test_sample_split_val_contamination():
+    from anomalyguard.pipeline import sample_split
+    n = 3000
+    df = pd.DataFrame({"split": np.repeat([0, 1, 2], n), "label": np.tile([0, 0, 1], n),
+                       "name": np.tile(["Normal", "Normal", "X"], n)})
+    sp = sample_split(df, 0, train_cap=500, val_cap=400, val_contamination=0.05)
+    assert len(sp.val) == 400 and int(sp.val["label"].sum()) == 20
+    assert int(sp.train["label"].sum()) == 0

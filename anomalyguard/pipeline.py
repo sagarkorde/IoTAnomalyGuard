@@ -41,12 +41,14 @@ class Split:
 
 def sample_split(df: pd.DataFrame, seed: int, train_cap: int = C.TRAIN_CAP,
                  val_cap: int = C.VAL_CAP, test_cap_per_type: int | None = None,
-                 contamination: float = 0.0) -> Split:
+                 contamination: float = 0.0, val_contamination: float = 0.0) -> Split:
     """Seeded sub-sampling of the chronological splits.
 
     ``contamination`` > 0 replaces that fraction of the benign training pool by anomalous
     packets drawn from the training segments (all types, proportional to their size), to
     emulate an unlabelled training capture that silently contains attacks.
+    ``val_contamination`` > 0 does the same for the calibration (validation) sample, with
+    anomalies drawn from the validation segments.
     """
     rng = np.random.default_rng(seed)
 
@@ -61,7 +63,10 @@ def sample_split(df: pd.DataFrame, seed: int, train_cap: int = C.TRAIN_CAP,
     train = cap(tr_ben, train_cap - n_bad)
     if n_bad:
         train = pd.concat([train, cap(tr_bad, n_bad)])
-    val = cap(df[(df["split"] == 1) & (df["label"] == 0)], val_cap)
+    n_vbad = int(round(val_contamination * val_cap))
+    val = cap(df[(df["split"] == 1) & (df["label"] == 0)], val_cap - n_vbad)
+    if n_vbad:
+        val = pd.concat([val, cap(df[(df["split"] == 1) & (df["label"] == 1)], n_vbad)])
     te = df[df["split"] == 2]
     if test_cap_per_type:
         parts = [cap(g, test_cap_per_type if n != "Normal" else None)
@@ -137,6 +142,56 @@ def run_view(det_name: str, seed: int, Xtr, Xva, Xte, ytr=None, extra=None, **pa
     return res
 
 
+def run_view_stratified(det_name: str, seed: int, Xtr, Xva, Xte, s_tr, s_va, s_te, extra=None,
+                        s_ex=None, **params) -> ViewResult:
+    """Service-stratified variant (Mondrian calibration): one detector per service context,
+    each calibrated on the benign validation packets of its own service. Returned scores are
+    -log of the per-service conformal p-values, so the pooled calibration downstream is a
+    monotone re-use of them."""
+    params = {k: v for k, v in params.items() if k != "stratify"}
+    Xtr, Xva, Xte = (np.asarray(x, dtype=np.float64) for x in (Xtr, Xva, Xte))
+    Xex = None if extra is None else np.asarray(extra, dtype=np.float64)
+    val, test = np.zeros(len(Xva)), np.zeros(len(Xte))
+    ex = None if Xex is None else np.zeros(len(Xex))
+    fit_s, score_s, n_sc = 0.0, 0.0, 0
+    services = [s for s in np.unique(s_tr) if (s_tr == s).sum() >= 2]
+    fallback = max(services, key=lambda s: (s_tr == s).sum())
+    for s in np.unique(np.concatenate([s_tr, s_va, s_te] + ([s_ex] if s_ex is not None else []))):
+        m_tr = s_tr == (s if s in services else fallback)
+        prm = dict(params)
+        if "max_samples" in prm and isinstance(prm["max_samples"], int):
+            prm["max_samples"] = min(prm["max_samples"], int(m_tr.sum()))
+        det = make(det_name, seed, **prm)
+        det.fit(Xtr[m_tr])
+        fit_s += det.fit_seconds
+        mv, mt = s_va == s, s_te == s
+        ref = det.score(Xva[mv]) if mv.any() else det.score(Xtr[m_tr])
+        if mv.any():
+            val[mv] = -np.log(empirical_pvalue(ref, ref, seed + 1))
+        if mt.any():
+            t0 = time.perf_counter()
+            st = det.score(Xte[mt])
+            score_s += time.perf_counter() - t0; n_sc += int(mt.sum())
+            test[mt] = -np.log(empirical_pvalue(st, ref, seed))
+        if Xex is not None and (s_ex == s).any():
+            me = s_ex == s
+            ex[me] = -np.log(empirical_pvalue(det.score(Xex[me]), ref, seed + 5))
+    res = ViewResult(val, test, fit_s, score_s / max(1, n_sc), dict(params, stratify=True))
+    res.extra = ex
+    res.model = None
+    return res
+
+
+def _view(det_name, seed, params, frames, Xtr, Xva, Xte, extra=None):
+    """Dispatch to the pooled or the service-stratified view runner."""
+    if params.get("stratify"):
+        ftr, fva, fte, fex = frames
+        return run_view_stratified(det_name, seed, Xtr, Xva, Xte, service_of(ftr), service_of(fva),
+                                   service_of(fte), extra=extra,
+                                   s_ex=None if fex is None else service_of(fex), **params)
+    return run_view(det_name, seed, Xtr, Xva, Xte, extra=extra, **params)
+
+
 def anomalyguard_scores(sp: Split, det_name: str = "IF", seed: int = 0, context: bool = True,
                         fingerprint: bool = True, fusion: bool = True,
                         det_params: dict | None = None, propagation: bool = False,
@@ -173,11 +228,12 @@ def anomalyguard_scores(sp: Split, det_name: str = "IF", seed: int = 0, context:
         net_extra, net_val, p_net_te = r.extra, r.val, p_te
     else:
         prm_n = _resolve_params(det_name, det_params, service_of(sp.train), len(Xtr))
-        net = run_view(det_name, seed, Xtr, Xva, Xte, extra=Xvs, **prm_n)
+        net = _view(det_name, seed, prm_n, (sp.train, sp.val, sp.test, sp.val_stream if propagation else None),
+                    Xtr, Xva, Xte, extra=Xvs)
         mtr, mva, mte = (TelemetryView.mask(f) for f in (sp.train, sp.val, sp.test))
         prm_t = _resolve_params(det_name, det_params, service_of(sp.train[mtr]), int(mtr.sum()))
-        tv = run_view(det_name, seed, tel.transform(sp.train[mtr]), tel.transform(sp.val[mva]),
-                      tel.transform(sp.test[mte]), **prm_t)
+        tv = _view(det_name, seed, prm_t, (sp.train[mtr], sp.val[mva], sp.test[mte], None),
+                   tel.transform(sp.train[mtr]), tel.transform(sp.val[mva]), tel.transform(sp.test[mte]))
         p_net_te = empirical_pvalue(net.test, net.val, seed)
         p_net_va = empirical_pvalue(net.val, net.val, seed + 1)
         p_tel_te = np.ones(len(sp.test)); p_tel_te[mte] = empirical_pvalue(tv.test, tv.val, seed + 2)

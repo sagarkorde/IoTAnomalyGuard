@@ -1,7 +1,9 @@
 """Statistical comparison of detectors (Friedman test + Holm-corrected Wilcoxon tests).
 
 Blocks are anomaly types (per-type recall at the 1 % FPR budget, averaged over seeds), so the
-tests ask whether a detector is consistently better *across attack/anomaly types*.
+tests ask whether a detector is consistently better *across attack/anomaly types*. The 16 types
+are not independent samples (they share captures, hosts and the benign reference), and the seeds
+share test packets, so the p-values are descriptive rather than confirmatory.
 """
 from __future__ import annotations
 
@@ -29,6 +31,9 @@ def holm(pvals: dict) -> dict:
 
 def per_type_matrix(variant: str = "fused+propagation", metric: str = "recall") -> pd.DataFrame:
     per = pd.read_csv(C.RESULTS_DIR / "e2_per_type.csv")
+    extra = C.RESULTS_DIR / "e10_per_type.csv"      # further baselines run under the same protocol
+    if extra.exists():
+        per = pd.concat([per, pd.read_csv(extra)], ignore_index=True)
     per = per[(per["variant"] == variant) | (per["detector"] == "HGB (supervised)")]
     cols = [c for c in per.columns if c.startswith(f"{metric}::")]
     m = per.groupby("detector")[cols].mean().T
@@ -61,6 +66,8 @@ def main():
             "median_paired_difference_reference_minus_other": diffs,
         }
     bench = pd.read_csv(C.RESULTS_DIR / "e2_benchmark.csv")
+    if (C.RESULTS_DIR / "e10_baselines.csv").exists():
+        bench = pd.concat([bench, pd.read_csv(C.RESULTS_DIR / "e10_baselines.csv")], ignore_index=True)
     g = bench.groupby(["detector", "variant"])["macro_recall"]
     out["macro_recall_seed_summary"] = {
         f"{k[0]} | {k[1]}": {"mean": float(v.mean()), "sd": float(v.std(ddof=1)),

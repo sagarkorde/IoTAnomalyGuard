@@ -1,0 +1,51 @@
+seed,router,queue,alerts,true_alerts,matching_true_alerts,false_alerts,precision,routing_precision,false_incidents
+0,view attribution,network,92336,91039.0,89578,1297.0,0.9859534742678912,0.9701308265465257,801.0
+0,view attribution,device/clinical,20773,20061.0,20061,712.0,0.9657247388436914,0.9657247388436914,499.0
+0,view attribution,recall-routing::Perception,539,,326,,,,
+0,view attribution,recall-routing::Network,89578,,89578,,,,
+0,view attribution,recall-routing::Application,20983,,19735,,,,
+0,telemetry presence (baseline),network,90604,89902.0,89578,702.0,0.9922519977042956,0.9886759966447397,409.0
+0,telemetry presence (baseline),device/clinical,22505,21198.0,21198,1307.0,0.9419240168851366,0.9419240168851366,889.0
+0,telemetry presence (baseline),recall-routing::Perception,539,,539,,,,
+0,telemetry presence (baseline),recall-routing::Network,89578,,89578,,,,
+0,telemetry presence (baseline),recall-routing::Application,20983,,20659,,,,
+1,view attribution,network,92609,91092.0,89564,1517.0,0.9836193026595688,0.9671198263667679,926.0
+1,view attribution,device/clinical,20452,19782.0,19782,670.0,0.9672403676902015,0.9672403676902015,465.0
+1,view attribution,recall-routing::Perception,760,,339,,,,
+1,view attribution,recall-routing::Network,89564,,89564,,,,
+1,view attribution,recall-routing::Application,20550,,19443,,,,
+1,telemetry presence (baseline),network,90910,89914.0,89564,996.0,0.9890441095589044,0.9851941480585195,544.0
+1,telemetry presence (baseline),device/clinical,22151,20960.0,20960,1191.0,0.9462326757257009,0.9462326757257009,844.0
+1,telemetry presence (baseline),recall-routing::Perception,760,,530,,,,
+1,telemetry presence (baseline),recall-routing::Network,89564,,89564,,,,
+1,telemetry presence (baseline),recall-routing::Application,20550,,20430,,,,
+2,view attribution,network,92532,91190.0,89729,1342.0,0.9854969091773657,0.9697077767691177,517.0
+2,view attribution,device/clinical,21687,20895.0,20895,792.0,0.9634804260616959,0.9634804260616959,567.0
+2,view attribution,recall-routing::Perception,769,,309,,,,
+2,view attribution,recall-routing::Network,89729,,89729,,,,
+2,view attribution,recall-routing::Application,21587,,20586,,,,
+2,telemetry presence (baseline),network,90620,89955.0,89729,665.0,0.992661664091812,0.9901677333921871,149.0
+2,telemetry presence (baseline),device/clinical,23599,22130.0,22130,1469.0,0.9377515996440527,0.9377515996440527,932.0
+2,telemetry presence (baseline),recall-routing::Perception,769,,543,,,,
+2,telemetry presence (baseline),recall-routing::Network,89729,,89729,,,,
+2,telemetry presence (baseline),recall-routing::Application,21587,,21587,,,,
+3,view attribution,network,91888,90717.0,89698,1171.0,0.9872562249695281,0.9761666376458297,489.0
+3,view attribution,device/clinical,22045,21306.0,21306,739.0,0.9664776593331821,0.9664776593331821,525.0
+3,view attribution,recall-routing::Perception,763,,342,,,,
+3,view attribution,recall-routing::Network,89698,,89698,,,,
+3,view attribution,recall-routing::Application,21562,,20964,,,,
+3,telemetry presence (baseline),network,90662,89956.0,89698,706.0,0.9922128344841279,0.9893670997771944,129.0
+3,telemetry presence (baseline),device/clinical,23271,22067.0,22067,1204.0,0.9482617850543595,0.9482617850543595,882.0
+3,telemetry presence (baseline),recall-routing::Perception,763,,535,,,,
+3,telemetry presence (baseline),recall-routing::Network,89698,,89698,,,,
+3,telemetry presence (baseline),recall-routing::Application,21562,,21532,,,,
+4,view attribution,network,92306,90830.0,89488,1476.0,0.9840097068446255,0.9694711069702945,850.0
+4,view attribution,device/clinical,20666,19977.0,19977,689.0,0.9666602148456401,0.9666602148456401,479.0
+4,view attribution,recall-routing::Perception,530,,74,,,,
+4,view attribution,recall-routing::Network,89488,,89488,,,,
+4,view attribution,recall-routing::Application,20789,,19903,,,,
+4,telemetry presence (baseline),network,90808,89793.0,89488,1015.0,0.9888225706986169,0.9854638357853933,457.0
+4,telemetry presence (baseline),device/clinical,22164,21014.0,21014,1150.0,0.9481140588341455,0.9481140588341455,871.0
+4,telemetry presence (baseline),recall-routing::Perception,530,,300,,,,
+4,telemetry presence (baseline),recall-routing::Network,89488,,89488,,,,
+4,telemetry presence (baseline),recall-routing::Application,20789,,20714,,,,

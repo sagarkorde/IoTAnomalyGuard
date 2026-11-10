@@ -1,0 +1,132 @@
+{
+  "stream:0": {
+    "NetworkAnomaliesSYNFlood": {
+      "start": 1744458531.456644,
+      "duration_s": 27.881364822387695
+    },
+    "NetworkAnomaliesFINFlood": {
+      "start": 1744472145.2899766,
+      "duration_s": 128.77250003814697
+    },
+    "NetworkAnomaliesMQTTBruteForce": {
+      "start": 1744493809.7317798,
+      "duration_s": 1828.0
+    },
+    "NetworkAnomaliesMQTTDoS": {
+      "start": 1744504112.3157246,
+      "duration_s": 19.917771100997925
+    },
+    "NetworkAnomaliesSlowloris": {
+      "start": 1744517381.704457,
+      "duration_s": 3189.0285980701447
+    },
+    "NetworkAnomaliesReconAttack": {
+      "start": 1744534684.0224407,
+      "duration_s": 4008.6602489948273
+    }
+  },
+  "stream:1": {
+    "NetworkAnomaliesMQTTDoS": {
+      "start": 1744460637.543772,
+      "duration_s": 19.917771100997925
+    },
+    "NetworkAnomaliesSlowloris": {
+      "start": 1744473101.6277773,
+      "duration_s": 3189.0285980701447
+    },
+    "NetworkAnomaliesFINFlood": {
+      "start": 1744487918.6738513,
+      "duration_s": 128.77250003814697
+    },
+    "NetworkAnomaliesMQTTBruteForce": {
+      "start": 1744498669.3312151,
+      "duration_s": 1828.0
+    },
+    "NetworkAnomaliesSYNFlood": {
+      "start": 1744526722.9254856,
+      "duration_s": 27.881364822387695
+    },
+    "NetworkAnomaliesReconAttack": {
+      "start": 1744533596.2737768,
+      "duration_s": 4008.6602489948273
+    }
+  },
+  "stream:2": {
+    "NetworkAnomaliesSYNFlood": {
+      "start": 1744455572.7158048,
+      "duration_s": 27.881364822387695
+    },
+    "NetworkAnomaliesSlowloris": {
+      "start": 1744476903.1932404,
+      "duration_s": 3189.0285980701447
+    },
+    "NetworkAnomaliesMQTTBruteForce": {
+      "start": 1744495062.5295427,
+      "duration_s": 1828.0
+    },
+    "NetworkAnomaliesFINFlood": {
+      "start": 1744503078.1627104,
+      "duration_s": 128.77250003814697
+    },
+    "NetworkAnomaliesMQTTDoS": {
+      "start": 1744517953.946886,
+      "duration_s": 19.917771100997925
+    },
+    "NetworkAnomaliesReconAttack": {
+      "start": 1744534942.52876,
+      "duration_s": 4008.6602489948273
+    }
+  },
+  "stream:3": {
+    "NetworkAnomaliesMQTTBruteForce": {
+      "start": 1744462466.3245804,
+      "duration_s": 1828.0
+    },
+    "NetworkAnomaliesMQTTDoS": {
+      "start": 1744474186.0012255,
+      "duration_s": 19.917771100997925
+    },
+    "NetworkAnomaliesReconAttack": {
+      "start": 1744487659.981474,
+      "duration_s": 4008.6602489948273
+    },
+    "NetworkAnomaliesSYNFlood": {
+      "start": 1744501421.641564,
+      "duration_s": 27.881364822387695
+    },
+    "NetworkAnomaliesFINFlood": {
+      "start": 1744518446.4744606,
+      "duration_s": 128.77250003814697
+    },
+    "NetworkAnomaliesSlowloris": {
+      "start": 1744529465.9229763,
+      "duration_s": 3189.0285980701447
+    }
+  },
+  "stream:4": {
+    "NetworkAnomaliesMQTTBruteForce": {
+      "start": 1744459974.486768,
+      "duration_s": 1828.0
+    },
+    "NetworkAnomaliesSlowloris": {
+      "start": 1744473102.606825,
+      "duration_s": 3189.0285980701447
+    },
+    "NetworkAnomaliesMQTTDoS": {
+      "start": 1744487432.2688622,
+      "duration_s": 19.917771100997925
+    },
+    "NetworkAnomaliesSYNFlood": {
+      "start": 1744503488.9025023,
+      "duration_s": 27.881364822387695
+    },
+    "NetworkAnomaliesReconAttack": {
+      "start": 1744518245.1090102,
+      "duration_s": 4008.6602489948273
+    },
+    "NetworkAnomaliesFINFlood": {
+      "start": 1744533673.5165155,
+      "duration_s": 128.77250003814697
+    }
+  }
+}

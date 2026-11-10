@@ -66,6 +66,39 @@ def fig_architecture():
     plt.close(fig)
 
 
+def fig_architecture_compact():
+    """Single-column version of the pipeline figure (used in the 6-page paper)."""
+    fig, ax = plt.subplots(figsize=(3.45, 1.9))
+    ax.set_xlim(0, 100); ax.set_ylim(0, 55); ax.axis("off")
+
+    def box(x, y, w, h, title, sub, accent=True):
+        ax.add_patch(FancyBboxPatch((x, y), w, h, boxstyle="round,pad=0.3,rounding_size=1.2",
+                                    fc="#eef4fc" if accent else "#f6f6f4",
+                                    ec=SLOTS[0] if accent else "#9a9893", lw=0.7))
+        ax.text(x + w / 2, y + h - 1.8, title, ha="center", va="top", fontsize=6.0, weight="bold", color=INK,
+                linespacing=1.1)
+        ax.text(x + w / 2, y + (h - (9.5 if "\n" in title else 5.5)) / 2 + 0.4, sub, ha="center", va="center",
+                fontsize=5.3, color=INK2, linespacing=1.2)
+
+    def arrow(x0, y0, x1, y1, rad=0.0):
+        ax.add_patch(FancyArrowPatch((x0, y0), (x1, y1), arrowstyle="-|>", mutation_scale=5.5, lw=0.6,
+                                     color=INK2, shrinkA=0, shrinkB=0, connectionstyle=f"arc3,rad={rad}"))
+
+    box(0.8, 27, 18, 26, "Packet\nstream", "one stream\nper sensor", False)
+    box(24, 41, 38, 12, "Network view", "headers + causal context\n→ IF with label-free ψ*")
+    box(24, 27, 38, 12, "Telemetry view", "device and vital signs\n→ same detector family")
+    box(67, 27, 32, 26, "Calibration\n+ fusion", "conformal p-values\n(benign data),\nBonferroni min-p,\n1 % threshold")
+    box(24, 2, 38, 19, "Session association", "flag packets to a host\nwith ≥ k alerts in 10 s")
+    box(67, 2, 32, 19, "Triage", "queues and\n60-s incidents", False)
+    arrow(19.4, 44, 23.6, 47); arrow(19.4, 36, 23.6, 33)
+    arrow(62.4, 47, 66.6, 44); arrow(62.4, 33, 66.6, 36)
+    arrow(83, 26.6, 83, 21.4)
+    arrow(66.6, 29, 62.4, 17, rad=-0.2)
+    arrow(62.4, 9, 66.6, 9)
+    fig.savefig(OUT / "F1_architecture_col.png")
+    plt.close(fig)
+
+
 def fig_audit():
     p = pd.concat([pd.read_csv(R / "e1_probes.csv"), pd.read_csv(R / "e1_protocols.csv")])
     b = pd.read_csv(R / "e2_benchmark.csv")
@@ -150,7 +183,7 @@ def fig_contamination():
 
 def main():
     OUT.mkdir(parents=True, exist_ok=True)
-    for f in (fig_architecture, fig_audit, fig_psi, fig_contamination):
+    for f in (fig_architecture, fig_architecture_compact, fig_audit, fig_psi, fig_contamination):
         try:
             f(); print("ok", f.__name__)
         except FileNotFoundError as e:
