@@ -1,0 +1,3 @@
+Variant,Selected (net/tel),Macro recall,Macro AUROC,Test FPR (%),Network,Perception,Application
+fused,"AE/AE, OCSVM/AE",0.886 ± 0.019,0.948 ± 0.005,1.05 ± 0.06,0.99 ± 0.01,0.86 ± 0.04,0.81 ± 0.06
+fused+propagation,"AE/AE, OCSVM/AE",0.890 ± 0.020,0.948 ± 0.005,1.05 ± 0.06,1.00 ± 0.00,0.86 ± 0.04,0.81 ± 0.06

@@ -120,8 +120,9 @@ def main(seeds=(0, 1, 2)):
     spell.to_csv(C.RESULTS_DIR / "e1_zero_dot_share_by_capture.csv")
     pres = df.groupby("capture_group", observed=True)[list(C.TELEMETRY_COLS)].agg(lambda s: float(s.notna().mean()))
     pres.to_csv(C.RESULTS_DIR / "e1_telemetry_presence_by_capture.csv")
-    hosts = df.groupby("capture_group", observed=True)["src"].agg(lambda s: sorted(set(map(str, s))))
-    write_json({k: v for k, v in hosts.items()}, C.RESULTS_DIR / "e1_sources_by_capture.json")
+    hosts = {str(k): sorted(set(map(str, g)))
+             for k, g in df.groupby("capture_group", observed=True)["src"]}
+    write_json(hosts, C.RESULTS_DIR / "e1_sources_by_capture.json")
 
 
 if __name__ == "__main__":

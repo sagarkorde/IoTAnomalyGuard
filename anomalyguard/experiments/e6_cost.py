@@ -25,6 +25,13 @@ REPEATS = 3
 
 def main(seed: int = 0):
     df = load_with_context()
+    # reference load: the highest packet rate (packets per wall-clock second) of any capture
+    sec = np.floor(df["t"].to_numpy()).astype(np.int64)
+    per_sec = pd.DataFrame({"capture_group": df["capture_group"].astype(str).to_numpy(), "sec": sec}) \
+        .groupby(["capture_group", "sec"]).size()
+    peak = per_sec.groupby(level=0).max().sort_values(ascending=False).rename("peak_pkts_per_s")
+    peak.to_csv(C.RESULTS_DIR / "e6_peak_rate.csv")
+    log(f"peak packet rate: {int(peak.iloc[0])} pkt/s ({peak.index[0]})")
     sp = sample_split(df, seed)
     ports = PortNovelty().fit(sp.train)
     Xtr = network_matrix(sp.train, ports).to_numpy(np.float64)

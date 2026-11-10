@@ -1,0 +1,83 @@
+{
+  "ApplicationAnomaliesAbnormalBreathing_High_RR": [
+    "10.42.0.1",
+    "10.42.0.7"
+  ],
+  "ApplicationAnomaliesAbnormalBreathing_Low_RR": [
+    "10.42.0.1",
+    "10.42.0.6",
+    "10.42.0.8"
+  ],
+  "ApplicationAnomaliesArrhythmia_SignalArtifact": [
+    "10.42.0.1",
+    "10.42.0.6",
+    "10.42.0.7",
+    "10.42.0.8",
+    "10.42.0.9"
+  ],
+  "ApplicationAnomaliesBradycardia": [
+    "10.42.0.1",
+    "10.42.0.6"
+  ],
+  "ApplicationAnomaliesClinical": [
+    "10.42.0.1",
+    "10.42.0.139",
+    "10.42.0.149"
+  ],
+  "ApplicationAnomaliesHypoxemia": [
+    "10.42.0.1",
+    "10.42.0.7"
+  ],
+  "ApplicationAnomaliesTachycardia": [
+    "10.42.0.1",
+    "10.42.0.6"
+  ],
+  "NetworkAnomaliesFINFlood": [
+    "10.42.0.37"
+  ],
+  "NetworkAnomaliesMQTTBruteForce": [
+    "10.42.0.1",
+    "10.42.0.37"
+  ],
+  "NetworkAnomaliesMQTTDoS": [
+    "10.42.0.1",
+    "10.42.0.40"
+  ],
+  "NetworkAnomaliesReconAttack": [
+    "10.42.0.1",
+    "10.42.0.40"
+  ],
+  "NetworkAnomaliesSYNFlood": [
+    "10.42.0.37"
+  ],
+  "NetworkAnomaliesSlowloris": [
+    "10.42.0.1",
+    "10.42.0.37"
+  ],
+  "NormalTrafficHTTP": [
+    "10.42.0.1",
+    "10.42.0.6",
+    "10.42.0.7",
+    "10.42.0.8",
+    "10.42.0.9"
+  ],
+  "NormalTrafficMQTT": [
+    "10.42.0.1",
+    "10.42.0.139",
+    "10.42.0.149",
+    "10.42.0.2",
+    "10.42.0.3"
+  ],
+  "PhysicalAnomaliesHTTP": [
+    "10.42.0.1",
+    "10.42.0.6",
+    "10.42.0.7",
+    "10.42.0.8",
+    "10.42.0.9"
+  ],
+  "PhysicalAnomaliesMQTT": [
+    "10.42.0.1",
+    "10.42.0.139",
+    "10.42.0.149"
+  ]
+}

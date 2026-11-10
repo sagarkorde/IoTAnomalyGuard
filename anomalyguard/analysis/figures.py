@@ -143,7 +143,7 @@ def fig_contamination():
     ax.set_xlabel("Unlabelled anomalies in the training pool ρ (%)")
     ax.set_ylabel("Macro recall at 1 % FPR"); ax.set_ylim(0, 1.0)
     ax.grid(axis="y"); ax.set_axisbelow(True)
-    ax.legend(loc="lower left", frameon=False)
+    ax.legend(loc="lower center", bbox_to_anchor=(0.5, 1.0), ncol=3, frameon=False, handlelength=2.4)
     fig.savefig(OUT / "F4_contamination.png")
     plt.close(fig)
 

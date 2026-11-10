@@ -1,0 +1,8 @@
+Setting,AUROC,Accuracy,F1,Macro recall
+Probe: absence spelling + telemetry presence (no behaviour),0.9888 ± 0.0000,0.9724 ± 0.0000,0.9640 ± 0.0000,0.853 ± 0.000
+"Probe: host identity (IP, MAC, client ID, TTL, window)",0.9714 ± 0.0006,0.8815 ± 0.0349,0.8604 ± 0.0336,0.806 ± 0.031
+"Supervised HGB, all columns, random split",1.0000 ± 0.0000,0.9984 ± 0.0001,0.9980 ± 0.0001,0.998 ± 0.000
+"Supervised HGB, all columns, chronological split",0.9987 ± 0.0003,0.9820 ± 0.0003,0.9766 ± 0.0004,0.962 ± 0.001
+"Supervised HGB, behaviour-only views, chronological split",0.9905 ± 0.0012,0.9618 ± 0.0016,0.9503 ± 0.0023,0.928 ± 0.003
+"IF (psi=256), all columns, random split",0.9094 ± 0.0048,0.6299 ± 0.0002,0.1348 ± 0.0021,0.084 ± 0.001
+"IF (psi=256), all columns, chronological split",0.9113 ± 0.0030,0.6296 ± 0.0007,0.1305 ± 0.0033,0.098 ± 0.003

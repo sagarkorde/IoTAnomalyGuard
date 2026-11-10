@@ -1,0 +1,25 @@
+{
+  "seed": 0,
+  "threshold_q99_val": 46.35216852440378,
+  "n_top": 601,
+  "service_share_train": {
+    "mqtt": 0.89599,
+    "http": 0.10173,
+    "other": 0.00228
+  },
+  "service_share_top_val": {
+    "mqtt": 0.19633943427620631,
+    "http": 0.5757071547420965,
+    "other": 0.22795341098169716
+  },
+  "indicator_prevalence_train": {
+    "http_has_response": 0.00903,
+    "proto_has_data": 0.00904
+  },
+  "indicator_prevalence_top_val": {
+    "http_has_response": 0.5690515806988353,
+    "proto_has_data": 0.5690515806988353
+  },
+  "share_top_val_with_any_indicator": 0.5690515806988353,
+  "share_test_anomalies_above_threshold": 0.06040755739847368
+}

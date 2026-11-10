@@ -1,0 +1,21 @@
+seed,true_layer,alerts,routed_network,routed_device_clinical
+0,Perception,539,213,326
+0,Network,89578,89578,0
+0,Application,20983,1248,19735
+0,Normal (false alerts),2009,1297,712
+1,Perception,760,421,339
+1,Network,89564,89564,0
+1,Application,20550,1107,19443
+1,Normal (false alerts),2187,1517,670
+2,Perception,769,460,309
+2,Network,89729,89729,0
+2,Application,21587,1001,20586
+2,Normal (false alerts),2134,1342,792
+3,Perception,763,421,342
+3,Network,89698,89698,0
+3,Application,21562,598,20964
+3,Normal (false alerts),1910,1171,739
+4,Perception,530,456,74
+4,Network,89488,89488,0
+4,Application,20789,886,19903
+4,Normal (false alerts),2165,1476,689

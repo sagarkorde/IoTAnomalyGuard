@@ -23,8 +23,9 @@ PREVALENCES = (0.001, 0.01, 0.05, 0.10)
 GAP_S = 60.0
 
 
-def incidents(test: pd.DataFrame, flags: np.ndarray) -> pd.DataFrame:
+def incidents(test: pd.DataFrame, flags: np.ndarray, score: np.ndarray | None = None) -> pd.DataFrame:
     a = test.loc[flags, ["capture_group", "src", "t", "label", "name"]].copy()
+    a["score"] = score[flags] if score is not None else 0.0
     a["capture_group"] = a["capture_group"].astype(str)
     a["src"] = a["src"].astype(str)
     a = a.sort_values(["capture_group", "src", "t"])
@@ -64,13 +65,23 @@ def main(seeds=C.SEEDS):
             prev_rows.append({"seed": seed, "prevalence": pi, "recall": rec, "fpr": fpr,
                               "precision": prec, "false_alerts_per_true_alert": (1 - prec) / prec})
         # (c) incidents
-        inc = incidents(sp.test, flags)
-        g = inc.groupby("incident").agg(n=("t", "size"), mal=("label", "max"))
-        inc_rows.append({"seed": seed, "alerts": int(flags.sum()), "incidents": int(len(g)),
-                         "true_incidents": int((g["mal"] == 1).sum()),
-                         "false_incidents": int((g["mal"] == 0).sum()),
-                         "alerts_per_incident": float(g["n"].mean()),
-                         "false_alerts": int(m0.sum())})
+        inc = incidents(sp.test, flags, out["score_test"])
+        g = inc.groupby("incident").agg(n=("t", "size"), mal=("label", "max"),
+                                        top=("score", "max"), dur=("t", lambda s: s.max() - s.min()))
+        row = {"seed": seed, "alerts": int(flags.sum()), "incidents": int(len(g)),
+               "true_incidents": int((g["mal"] == 1).sum()),
+               "false_incidents": int((g["mal"] == 0).sum()),
+               "alerts_per_incident": float(g["n"].mean()),
+               "alerts_per_true_incident": float(g.loc[g["mal"] == 1, "n"].mean()),
+               "alerts_per_false_incident": float(g.loc[g["mal"] == 0, "n"].mean()),
+               "false_alerts": int(m0.sum())}
+        # analyst queue: incidents ranked by size (alerts), ties broken by the strongest alert
+        ranked = g.sort_values(["n", "top"], ascending=False)
+        for k in (10, 25, 50, 100):
+            row[f"incident_precision_at_{k}"] = float(ranked["mal"].iloc[:k].mean())
+        true_total = int((g["mal"] == 1).sum())
+        row["incident_recall_at_100"] = float(ranked["mal"].iloc[:100].sum() / max(1, true_total))
+        inc_rows.append(row)
         log(f"seed {seed}: alerts={flags.sum()} incidents={len(g)} rec={rec:.3f} fpr={fpr:.4f}")
     pd.DataFrame(route_rows).to_csv(C.RESULTS_DIR / "e7_routing.csv", index=False)
     pd.DataFrame(prev_rows).to_csv(C.RESULTS_DIR / "e7_base_rate.csv", index=False)

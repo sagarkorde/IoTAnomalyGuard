@@ -1,0 +1,17 @@
+Anomaly type,Layer,IF-default,AnomalyGuard-IF,ECOD,HBOS,LOF,OCSVM,AE,HGB (supervised)
+FIN_Flood,Network,0.05,1.0,0.0,0.0,0.0,1.0,1.0,1.0
+ReconAttack,Network,0.02,1.0,0.12,0.0,0.0,1.0,1.0,1.0
+MQTT_Message_Flood,Network,0.35,1.0,0.69,0.93,0.0,1.0,1.0,1.0
+Slowloris,Network,0.54,0.98,0.0,0.0,0.56,1.0,1.0,1.0
+SYN_Flood,Network,0.1,1.0,0.1,0.0,0.0,1.0,1.0,1.0
+MQTTBruteForce,Network,0.0,0.99,0.0,0.62,0.12,0.87,0.99,1.0
+Overheating,Perception,0.05,0.52,0.02,0.61,0.99,0.98,0.98,0.99
+CPUSpike,Perception,0.0,0.03,0.0,0.02,0.66,0.66,0.67,0.14
+Weak_Signal,Perception,0.06,0.17,0.0,0.12,0.94,0.67,0.92,0.99
+Clinical,Application,0.0,0.01,0.0,0.0,0.0,0.0,0.01,0.49
+Hypoxemia,Application,0.33,0.98,0.0,0.68,0.44,1.0,1.0,1.0
+Bradycardia,Application,0.96,1.0,0.0,0.73,1.0,1.0,1.0,1.0
+AbnormalBreathing(Low RR),Application,1.0,0.93,0.0,0.59,0.04,0.23,0.69,1.0
+AbnormalBreathing(High RR),Application,1.0,1.0,0.0,1.0,1.0,1.0,1.0,1.0
+Arrhythmia/SignalArtifact,Application,0.66,0.95,0.0,0.96,0.71,0.98,0.98,1.0
+Tachycardia,Application,0.96,1.0,0.0,0.73,1.0,1.0,1.0,1.0

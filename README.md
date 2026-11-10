@@ -16,8 +16,8 @@ SHA-256, and regenerates all results with one command.
 | Detectors | `anomalyguard/detectors.py` | Isolation Forest, ECOD, HBOS, LOF, One-Class SVM (Nyström + SGD), MLP autoencoder, and a supervised HGB reference behind one `fit/score` interface |
 | Calibration | `anomalyguard/calibration.py` | Benign-only thresholds, smoothed conformal p-values, Bonferroni cross-layer fusion with view attribution |
 | Pipeline | `anomalyguard/pipeline.py` | Label-free Isolation-Forest subsample rule (ψ), cross-layer scoring, causal alert propagation with a benign-calibrated trigger |
-| Experiments | `anomalyguard/experiments/e1…e8` | Shortcut audit, benchmark, ablation, ψ sweep, contamination, cost, triage, validation-selected views |
-| Analysis | `anomalyguard/analysis/` | Statistics (Friedman, Holm-corrected Wilcoxon), tables and figures |
+| Experiments | `anomalyguard/experiments/e1…e8` | Shortcut audit, benchmark, ablation, ψ sweep, contamination, cost (incl. peak packet rate), triage, validation-selected views |
+| Analysis | `anomalyguard/analysis/` | Statistics (Friedman, Holm-corrected Wilcoxon), tables, figures, ECOD threshold diagnostic |
 | Tests | `tests/test_core.py` | 20 unit tests (calibration under ties, causality of context features, propagation, fusion, detector sanity) |
 
 ## Reproduce
@@ -29,10 +29,11 @@ pip install -r requirements.txt
 make data        # sparse-clones X-IoMT v1.1 at commit 2e25990 and verifies 109 SHA-256 sums
 make processed   # builds data/processed/xiomt.parquet (+ cleaning report)
 make test        # unit tests
-make all         # every experiment, statistics, tables and figures (~1.5 h on 2 cores)
+make all         # every experiment, statistics, tables and figures (about 1 h on 2 cores)
 ```
 
-Single steps: `make e1` … `make e8`, `make stats`, `make tables`, `make figures`.
+Single steps: `make e1` … `make e8`, `make diag` (ECOD threshold diagnostic), `make stats`,
+`make tables`, `make figures`. Run E2 before `make figures` (the figures reuse its score dump).
 A five-minute smoke run: `make quick`.
 
 Every stochastic component is seeded (`SEEDS = (0, 1, 2, 3, 4)` in `anomalyguard/config.py`);
@@ -56,6 +57,39 @@ only; the full test segments (315,938 packets) are scored. Host identity (IPs, M
 client IDs, timestamps, sequence numbers) never enters a model; absent-value tokens are
 canonicalised so that their capture-specific spelling cannot be exploited. Results are
 reported as mean ± s.d. over five seeds, per anomaly type and macro-averaged.
+
+## Headline results
+
+All numbers below are produced by the code in this repository (`results/`), mean over five seeds
+unless stated otherwise; thresholds are calibrated on benign validation traffic at a 1 % budget.
+
+* **Shortcut audit (E1).** A classifier that sees only how absent values are spelled and which
+  telemetry fields are present separates normal from anomalous test packets with AUROC
+  0.989; the conventional all-columns pipeline with a random split reports 99.84 % accuracy.
+* **Benchmark (E2)** on the full chronological test segments (315,938 packets):
+
+| Detector (fusion + session association) | Macro recall | Macro AUROC | Test FPR (%) | Network | Perception | Application |
+|---|---|---|---|---|---|---|
+| AE | 0.890 ± 0.018 | 0.946 | 1.07 | 0.998 | 0.858 | 0.812 |
+| OCSVM | 0.837 ± 0.011 | 0.952 | 1.01 | 0.978 | 0.772 | 0.745 |
+| AnomalyGuard-IF | 0.785 ± 0.018 | 0.916 | 1.08 | 0.995 | 0.241 | 0.838 |
+| LOF | 0.467 ± 0.031 | 0.893 | 1.54 | 0.114 | 0.864 | 0.599 |
+| HBOS | 0.438 ± 0.012 | 0.838 | 1.06 | 0.259 | 0.250 | 0.672 |
+| IF-default | 0.380 ± 0.051 | 0.890 | 1.15 | 0.175 | 0.038 | 0.702 |
+| ECOD | 0.058 ± 0.007 | 0.920 | 0.00 | 0.152 | 0.007 | 0.000 |
+| HGB (supervised) | 0.913 ± 0.006 | 0.991 | 1.06 | 1.000 | 0.709 | 0.926 |
+
+* **Ablation (E3).** Plain IF with ψ = 256 reaches a macro recall of 0.074;
+  the full AnomalyGuard-IF reaches 0.785. Reverting only the ψ rule gives
+  0.380, removing causal context 0.450, removing fusion
+  0.446.
+* **Contamination (E5, three seeds).** With 10 % unlabelled anomalies in the training pool,
+  AnomalyGuard-IF falls from 0.789 to 0.741 and OCSVM from
+  0.833 to 0.513.
+
+The autoencoder and the one-class SVM obtain a higher macro recall than AnomalyGuard-IF, mainly on
+perception-layer (device) faults; no unsupervised detector separates the 'Clinical' anomalies.
+`results/stats.json` holds the Friedman and Holm-corrected Wilcoxon tests.
 
 ## Layout
 

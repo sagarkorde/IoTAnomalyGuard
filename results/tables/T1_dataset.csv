@@ -1,0 +1,18 @@
+Class,Layer,Captures,Packets,Test packets
+Normal,Normal,4,959947,191980
+FIN_Flood,Network,1,93262,18652
+MQTTBruteForce,Network,1,14999,2999
+MQTT_Message_Flood,Network,1,96079,19215
+ReconAttack,Network,1,29801,5960
+SYN_Flood,Network,1,96375,19275
+Slowloris,Network,1,120316,24063
+CPUSpike,Perception,2,13880,9528
+Overheating,Perception,2,25130,528
+Weak_Signal,Perception,2,13880,528
+AbnormalBreathing(High RR),Application,1,18000,3600
+AbnormalBreathing(Low RR),Application,1,18000,3600
+Arrhythmia/SignalArtifact,Application,1,18000,3600
+Bradycardia,Application,1,18000,3600
+Clinical,Application,1,8035,1610
+Hypoxemia,Application,1,18000,3600
+Tachycardia,Application,1,18000,3600

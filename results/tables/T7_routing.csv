@@ -1,0 +1,5 @@
+true_layer,alerts,routed_network,routed_device_clinical,Network queue (%),Device/clinical queue (%)
+Application,105471,4840,100631,4.6,95.4
+Network,448057,448057,0,100.0,0.0
+Normal (false alerts),10405,6803,3602,65.4,34.6
+Perception,3361,1971,1390,58.6,41.4
