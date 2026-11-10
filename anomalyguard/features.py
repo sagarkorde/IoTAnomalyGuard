@@ -159,7 +159,7 @@ def context_view(df: pd.DataFrame) -> pd.DataFrame:
 
 
 def _window_counts_streamwise(t: np.ndarray, start: np.ndarray, w: float) -> np.ndarray:
-    """Like ``_window_counts`` but safe across stream boundaries (times restart per stream)."""
+    """Index of the first packet inside (t - w, t] for every packet, computed per stream."""
     n = len(t)
     lo = np.empty(n, dtype=np.int64)
     bounds = np.flatnonzero(np.r_[True, start[1:] != start[:-1]])
