@@ -5,9 +5,9 @@ PY ?= python3
 export PYTHONPATH := $(CURDIR)
 export PYTHONHASHSEED := 0
 
-.PHONY: all data processed test e1 e2 e3 e4 e5 e6 e7 e8 e9 e10 e11 e12 diag stats tables figures quick clean
+.PHONY: all data processed test e1 e2 e3 e4 e5 e6 e7 e8 e9 e10 e11 e12 e13 diag stats tables figures quick clean
 
-all: data processed test e1 e2 e3 e4 e5 e6 e7 e8 e9 e10 e11 e12 diag stats tables figures
+all: data processed test e1 e2 e3 e4 e5 e6 e7 e8 e9 e10 e11 e12 e13 diag stats tables figures
 
 data:
 	bash scripts/fetch_data.sh
@@ -39,6 +39,8 @@ e10:
 	$(PY) -m anomalyguard.analysis.merge_e10
 e11: ; OMP_NUM_THREADS=1 OPENBLAS_NUM_THREADS=1 MKL_NUM_THREADS=1 NUMBA_NUM_THREADS=1 $(PY) -m anomalyguard.experiments.e11_pipeline_cost
 e12: ; $(PY) -m anomalyguard.experiments.e12_psi_mix
+# E13: rolling threshold recalibration on benign MQTT/HTTP test packets (per-capture protocol)
+e13: ; $(PY) -m anomalyguard.experiments.e13_recalibration
 diag: ; $(PY) -m anomalyguard.analysis.ecod_tail
 
 stats:   ; $(PY) -m anomalyguard.analysis.stats

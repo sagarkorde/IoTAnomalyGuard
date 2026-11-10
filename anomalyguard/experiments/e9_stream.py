@@ -21,7 +21,8 @@ timestamps are synthetic (five captures share the same 24-h clock) or overlap th
 of the same devices, so merging them would invent concurrent copies of a device.
 
 Recall is measured on every packet of each attack capture (not only its last 20 %), in both
-protocols. Extra metrics: benign FPR inside the attack windows (attack span +/- 10 s) and outside them,
+protocols. Session association is evaluated in two forms: the host rule of the main pipeline and the
+conservative host-pair rule (pipeline.propagate_alerts(mode="pair")). Extra metrics: benign FPR inside the attack windows (attack span +/- 10 s) and outside them,
 FPR on the held-out benign capture, FPR per tenth of the benign test period (drift), and the
 realised benign FPR of the fused conformal p-values at several nominal levels (coverage).
 
@@ -94,7 +95,7 @@ def build(protocol: str, seed: int):
 
 
 def extra_metrics(test: pd.DataFrame, flags: np.ndarray, flags_prop: np.ndarray, p_fused: np.ndarray,
-                  windows, protocol: str) -> dict:
+                  windows, protocol: str, flags_pair: np.ndarray | None = None) -> dict:
     y = test["label"].to_numpy()
     ben = y == 0
     t = test["t"].to_numpy()
@@ -103,7 +104,8 @@ def extra_metrics(test: pd.DataFrame, flags: np.ndarray, flags_prop: np.ndarray,
     inwin = np.zeros(len(test), bool)
     for a, b in windows:
         inwin |= (t >= a) & (t <= b)
-    for tag, f in (("", flags), ("_prop", flags_prop)):
+    variants = [("", flags), ("_prop", flags_prop)] + ([("_pair", flags_pair)] if flags_pair is not None else [])
+    for tag, f in variants:
         out[f"fpr{tag}"] = float(f[ben].mean())
         if protocol == "stream":
             out[f"fpr_in_attack_windows{tag}"] = float(f[ben & inwin].mean()) if (ben & inwin).any() else np.nan
@@ -151,8 +153,11 @@ def main(protocols=("per-capture", "stream"), seeds=C.SEEDS, detectors=DEFAULT_D
                 flags = out["score_test"] >= out["thr"]
                 flags_prop = flags | out["prop_flags"]
                 p_fused = np.exp(-out["score_test"])
-                ex = extra_metrics(sp.test, flags, flags_prop, p_fused, windows, protocol)
-                for vname, extra in (("fused", None), ("fused+propagation", out["prop_flags"])):
+                ex = extra_metrics(sp.test, flags, flags_prop, p_fused, windows, protocol,
+                                   flags | out["prop_flags_pair"])
+                ex["prop_k_pair"] = out.get("prop_k_pair")
+                for vname, extra in (("fused", None), ("fused+propagation", out["prop_flags"]),
+                                     ("fused+pair-association", out["prop_flags_pair"])):
                     row, per = evaluate(sp.test, out["score_test"], out["thr"], layers, extra)
                     meta = {"protocol": protocol, "detector": label, "variant": vname, "seed": seed,
                             "prop_k": out.get("prop_k"), "psi_net": out["params_net"].get("max_samples")}

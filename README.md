@@ -16,7 +16,7 @@ SHA-256, and regenerates all results with one command.
 | Detectors | `anomalyguard/detectors.py` | Isolation Forest, ECOD, HBOS, LOF, One-Class SVM (Nyström + SGD), MLP autoencoder, and a supervised HGB reference behind one `fit/score` interface |
 | Calibration | `anomalyguard/calibration.py` | Benign-only thresholds, smoothed conformal p-values, Bonferroni cross-layer fusion with view attribution |
 | Pipeline | `anomalyguard/pipeline.py` | Label-free Isolation-Forest subsample rule (ψ), cross-layer scoring, causal alert propagation with a benign-calibrated trigger |
-| Experiments | `anomalyguard/experiments/e1…e12` | Shortcut audit, benchmark, ablation, ψ sweep, contamination (training and calibration), detector cost (incl. peak packet rate), triage and queues, validation-selected views, interleaved single stream without capture IDs, extra baselines (IF-strat, DIF), end-to-end pipeline cost, ψ rule under re-drawn service mixes |
+| Experiments | `anomalyguard/experiments/e1…e13` | Shortcut audit, benchmark, ablation, ψ sweep, contamination (training and calibration), detector cost (incl. peak packet rate), triage and queues, validation-selected views, interleaved single stream without capture IDs, extra baselines (IF-strat, DIF), end-to-end pipeline cost, ψ rule under re-drawn service mixes, rolling threshold recalibration |
 | Analysis | `anomalyguard/analysis/` | Statistics (Friedman, Holm-corrected Wilcoxon), tables, figures, ECOD threshold diagnostic, collateral-alert diagnostic, E10 merge |
 | Tests | `tests/test_core.py` | 20 unit tests (calibration under ties, causality of context features, propagation, fusion, detector sanity) |
 
@@ -32,7 +32,7 @@ make test        # unit tests
 make all         # every experiment, statistics, tables and figures (about 2 h on 2 cores, 8 GB RAM)
 ```
 
-Single steps: `make e1` … `make e12`, `make diag` (ECOD threshold diagnostic), `make stats`,
+Single steps: `make e1` … `make e13`, `make diag` (ECOD threshold diagnostic), `make stats`,
 `make tables`, `make figures`. Run E2 before `make figures` (the figures reuse its score dump).
 A five-minute smoke run: `make quick`.
 
@@ -89,10 +89,17 @@ unless stated otherwise; thresholds are calibrated on benign validation traffic 
   network recall of at most 0.16; the rule's ψ* (1024–16384) reaches
   0.69–0.87, and the largest ψ tested (16,384) is
   better still on every mix (0.84–0.93).
-* **Deployment-style stream (E9).** Network attacks interleaved into the benign MQTT test day, one stream,
+* **Controlled stream (E9).** Network attacks interleaved into the benign MQTT test day, one stream,
   no capture IDs, `Clinical` capture held out. Benign FPR inside attack windows before session association:
   AnomalyGuard-IF 0.9 %, DIF 4.9 %, OCSVM 10.8 %, AE 16.3 %; outside the windows about
-  1.1 %.
+  1.1 %. Host association raises the in-window rate to 11.7 % (AnomalyGuard-IF),
+  22.2 % (OCSVM) and 31.8 % (AE); the host-pair rule (`propagate_alerts(..., mode="pair")`)
+  keeps the same network recall (0.99, 0.94, 1.00) at 1.0 %, 13.9 % and 16.3 %.
+* **Per-service FPR and recalibration (E13).** In the per-capture protocol, benign HTTP test packets
+  are flagged at 5.4–7.5 % on average (up to 13–20 % in one tenth of the test period) against
+  0.3–0.6 % for MQTT. Recalibrating each tenth's threshold on the previous tenth lowers HTTP to
+  1.7–2.0 % but raises MQTT to 1.0–1.2 % and would cost macro recall (AnomalyGuard-IF 0.694 → 0.523,
+  AE 0.878 → 0.783, OCSVM 0.824 → 0.737; fusion without association).
 * **Contamination (E5, three seeds).** 10 % anomalies in the training pool: AnomalyGuard-IF
   0.789 → 0.741, OCSVM 0.833 → 0.513,
   AE 0.886 → 0.685. 1 % anomalies in the calibration sample: AnomalyGuard-IF

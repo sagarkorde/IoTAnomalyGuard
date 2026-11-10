@@ -133,6 +133,26 @@ def test_propagation_requires_min_alerts_and_is_causal():
     assert not propagate_alerts(df, flags, window_s=10.0, min_alerts=4).any()
 
 
+def test_pair_propagation_links_only_replies_to_the_alerting_host():
+    df = pd.DataFrame({
+        "capture_group": ["g"] * 5, "src": ["atk", "atk", "vic", "vic", "vic"],
+        "dst": ["vic", "vic", "atk", "srv", "atk"], "t": [0.0, 1.0, 1.5, 1.6, 20.0],
+    })
+    flags = np.array([True, True, False, False, False])
+    host = propagate_alerts(df, flags, window_s=10.0, min_alerts=2, mode="host")
+    pair = propagate_alerts(df, flags, window_s=10.0, min_alerts=2, mode="pair")
+    # host rule: every packet to the alerting host "atk" inside the window is linked
+    assert list(host[2:]) == [True, False, False]
+    # pair rule: the victim's reply to "atk" is linked, its traffic to "srv" is not
+    assert list(pair[2:]) == [True, False, False]
+    # a third party talking to "atk" is linked by the host rule but not by the pair rule
+    df3 = pd.concat([df, pd.DataFrame({"capture_group": ["g"], "src": ["other"], "dst": ["atk"],
+                                       "t": [2.0]})], ignore_index=True)
+    f3 = np.append(flags, False)
+    assert propagate_alerts(df3, f3, 10.0, 2, mode="host")[-1]
+    assert not propagate_alerts(df3, f3, 10.0, 2, mode="pair")[-1]
+
+
 def test_propagation_calibration_on_benign():
     df = pd.DataFrame({"capture_group": ["g"] * 4, "src": ["a", "b", "a", "b"],
                        "dst": ["b", "a", "b", "a"], "t": [0.0, 0.1, 0.2, 0.3]})

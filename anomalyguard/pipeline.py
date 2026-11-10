@@ -261,12 +261,15 @@ def anomalyguard_scores(sp: Split, det_name: str = "IF", seed: int = 0, context:
         out["prop_val_extra_fpr"] = float((propagate_alerts(sp.val_stream, f_vs, window_s, k)
                                            & ~f_vs).mean())
         out["net_flags_test"] = f_te
+        k_pair = calibrate_propagation(sp.val_stream, f_vs, window_s, mode="pair")
+        out["prop_k_pair"] = k_pair
+        out["prop_flags_pair"] = propagate_alerts(sp.test, f_te, window_s, k_pair, mode="pair")
     return out
 
 
 # ----------------------------------------------------------------- context propagation
 def propagate_alerts(frame: pd.DataFrame, net_flags: np.ndarray, window_s: float = 10.0,
-                     min_alerts: int = 1) -> np.ndarray:
+                     min_alerts: int = 1, mode: str = "host") -> np.ndarray:
     """Session-association rule (causal).
 
     A packet is flagged when its destination host raised at least ``min_alerts``
@@ -275,6 +278,10 @@ def propagate_alerts(frame: pd.DataFrame, net_flags: np.ndarray, window_s: float
     alerts. ``min_alerts`` suppresses propagation from a busy benign host that raises an
     occasional false alert; it is calibrated on benign validation traffic only
     (``calibrate_propagation``).
+
+    ``mode="pair"`` is the conservative host-pair variant: packet i (source a, destination d) is
+    flagged only if d raised at least ``min_alerts`` alerts *addressed to a* in the window, so
+    a victim's replies to an attacker are linked but its traffic with other hosts is not.
     """
     g = frame["capture_group"].astype(str).to_numpy()
     src = frame["src"].astype(str).to_numpy()
@@ -284,10 +291,16 @@ def propagate_alerts(frame: pd.DataFrame, net_flags: np.ndarray, window_s: float
     alert_idx = np.flatnonzero(net_flags)
     if len(alert_idx) == 0:
         return out
-    a = pd.DataFrame({"g": g[alert_idx], "h": src[alert_idx], "t": t[alert_idx]})
-    times = {k: np.sort(v.to_numpy()) for k, v in a.groupby(["g", "h"])["t"]}
-    q = pd.DataFrame({"g": g, "h": dst, "t": t, "i": np.arange(len(frame))})
-    for key, sub in q.groupby(["g", "h"]):
+    if mode == "pair":
+        a = pd.DataFrame({"g": g[alert_idx], "h": src[alert_idx], "p": dst[alert_idx], "t": t[alert_idx]})
+        keys = ["g", "h", "p"]
+        q = pd.DataFrame({"g": g, "h": dst, "p": src, "t": t, "i": np.arange(len(frame))})
+    else:
+        a = pd.DataFrame({"g": g[alert_idx], "h": src[alert_idx], "t": t[alert_idx]})
+        keys = ["g", "h"]
+        q = pd.DataFrame({"g": g, "h": dst, "t": t, "i": np.arange(len(frame))})
+    times = {k: np.sort(v.to_numpy()) for k, v in a.groupby(keys)["t"]}
+    for key, sub in q.groupby(keys):
         A = times.get(key)
         if A is None:
             continue
@@ -300,12 +313,12 @@ def propagate_alerts(frame: pd.DataFrame, net_flags: np.ndarray, window_s: float
 
 def calibrate_propagation(val_stream: pd.DataFrame, val_flags: np.ndarray, window_s: float = 10.0,
                           extra_fpr: float = 0.001,
-                          grid=(1, 2, 3, 5, 10, 20, 50, 100, 200)) -> int:
+                          grid=(1, 2, 3, 5, 10, 20, 50, 100, 200), mode: str = "host") -> int:
     """Smallest ``min_alerts`` whose propagation adds at most ``extra_fpr`` false alerts on
     the *complete* benign validation stream (no anomaly labels are used)."""
     base = val_flags.astype(bool)
     for k in grid:
-        add = propagate_alerts(val_stream, base, window_s, k) & ~base
+        add = propagate_alerts(val_stream, base, window_s, k, mode) & ~base
         if add.mean() <= extra_fpr:
             return int(k)
     return int(grid[-1])
